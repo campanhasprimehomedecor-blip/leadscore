@@ -108,33 +108,17 @@ export function generateCopyText(
   text += `🔥 CLASSIFICAÇÃO: ${result.classification}\n`;
   text += `💡 RECOMENDAÇÃO: ${result.recommendation}\n\n`;
 
-  text += `📊 PONTUAÇÃO POR CATEGORIA:\n`;
+  text += `📊 RESUMO POR CATEGORIA:\n`;
   result.categoryResults.forEach((cat) => {
     if (cat.isPenalty) {
-      text += `• ${cat.title}: -${cat.cappedPoints} pts\n`;
+      text += `• ${cat.title.split('(')[0].trim()}: -${cat.cappedPoints} pts\n`;
     } else {
-      text += `• ${cat.title}: ${cat.cappedPoints}/${cat.maxPoints} pts\n`;
+      text += `• ${cat.title.split('(')[0].trim()}: ${cat.cappedPoints}/${cat.maxPoints} pts\n`;
     }
   });
 
-  if (result.answersSummary.length > 0) {
-    text += `\n✅ PRINCIPAIS RESPOSTAS:\n`;
-    result.answersSummary.forEach((item) => {
-      text += `- ${item.question}: ${item.answerLabel} (+${item.points})\n`;
-    });
-  }
-
-  text += `\n⚠️ PENALIZAÇÕES APLICADAS:\n`;
-  if (result.penaltiesApplied.length > 0) {
-    result.penaltiesApplied.forEach((item) => {
-      text += `- ${item.question}: ${item.answerLabel} (-${item.points})\n`;
-    });
-  } else {
-    text += `- Nenhuma penalização identificada.\n`;
-  }
-
   text += `----------------------------------------\n`;
-  text += `Prime Home Decor — Sistema Interno de Lead Scoring`;
+  text += `Prime Home Decor — SDR Lead Scoring`;
 
   return text;
 }
