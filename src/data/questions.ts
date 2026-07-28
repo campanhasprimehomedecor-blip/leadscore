@@ -1,10 +1,10 @@
 import { Category, QuestionOption } from '../types';
 
 export const STANDARD_YES_NO_OPTIONS = (simPoints: number): QuestionOption[] => [
-  { label: 'Selecione uma opção', value: '', points: 0 },
+  { label: 'Selecione', value: '', points: 0 },
   { label: 'Sim', value: 'sim', points: simPoints },
   { label: 'Não', value: 'nao', points: 0 },
-  { label: 'Não tenho essa informação', value: 'sem_info', points: 0 },
+  { label: 'Sem info', value: 'sem_info', points: 0 },
 ];
 
 export const CATEGORIES: Category[] = [
@@ -15,22 +15,22 @@ export const CATEGORIES: Category[] = [
     questions: [
       {
         id: 'p1',
-        text: 'Está decorando ou mobiliando um ambiente completo?',
+        text: 'Mobiliando ambiente completo?',
         options: STANDARD_YES_NO_OPTIONS(10),
       },
       {
         id: 'p2',
-        text: 'Possui arquiteto, designer ou projeto em andamento?',
+        text: 'Tem arquiteto ou projeto?',
         options: STANDARD_YES_NO_OPTIONS(6),
       },
       {
         id: 'p3',
-        text: 'Procura móveis clássicos, importados ou premium?',
+        text: 'Busca móveis clássicos/premium?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'p4',
-        text: 'Demonstra compatibilidade com produtos de ticket alto?',
+        text: 'Perfil compatível com ticket alto?',
         options: STANDARD_YES_NO_OPTIONS(6),
       },
     ],
@@ -42,22 +42,22 @@ export const CATEGORIES: Category[] = [
     questions: [
       {
         id: 'i1',
-        text: 'Perguntou o preço de um produto específico?',
+        text: 'Perguntou preço de item específico?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'i2',
-        text: 'Perguntou sobre prazo, frete ou pagamento?',
+        text: 'Perguntou sobre frete/prazo/pagamento?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'i3',
-        text: 'Enviou foto do ambiente ou pediu orçamento?',
+        text: 'Enviou foto ou pediu orçamento?',
         options: STANDARD_YES_NO_OPTIONS(10),
       },
       {
         id: 'i4',
-        text: 'Perguntou disponibilidade ou comparou modelos?',
+        text: 'Consultou estoque ou comparou?',
         options: STANDARD_YES_NO_OPTIONS(9),
       },
     ],
@@ -69,17 +69,17 @@ export const CATEGORIES: Category[] = [
     questions: [
       {
         id: 'o1',
-        text: 'Veio de uma campanha ou anúncio?',
+        text: 'Veio de anúncio ou campanha?',
         options: STANDARD_YES_NO_OPTIONS(5),
       },
       {
         id: 'o2',
-        text: 'Chamou no WhatsApp após ver um anúncio ou publicação?',
+        text: 'Chamo no WhatsApp via anúncio?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'o3',
-        text: 'Pediu outras opções ou retomou a conversa?',
+        text: 'Pediu opções ou retomou contato?',
         options: STANDARD_YES_NO_OPTIONS(7),
       },
     ],
@@ -91,52 +91,51 @@ export const CATEGORIES: Category[] = [
     questions: [
       {
         id: 'u1',
-        text: 'Quando o lead pretende comprar?',
+        text: 'Prazo previsto para compra:',
         options: [
-          { label: 'Selecione o prazo', value: '', points: 0 },
-          { label: 'Em até 7 dias', value: '7_dias', points: 10 },
-          { label: 'Em até 30 dias', value: '30_dias', points: 7 },
-          { label: 'Depois de 30 dias', value: 'apos_30_dias', points: 2 },
+          { label: 'Selecione', value: '', points: 0 },
+          { label: 'Até 7 dias', value: '7_dias', points: 10 },
+          { label: 'Até 30 dias', value: '30_dias', points: 7 },
+          { label: 'Mais de 30 dias', value: 'apos_30_dias', points: 2 },
           { label: 'Ainda não sabe', value: 'nao_sabe', points: 0 },
-          { label: 'Não tenho essa informação', value: 'sem_info', points: 0 },
         ],
       },
       {
         id: 'u2',
-        text: 'O lead responde rapidamente?',
+        text: 'Lead responde rápido no chat?',
         options: STANDARD_YES_NO_OPTIONS(5),
       },
     ],
   },
   {
     id: 'penalizacoes',
-    title: '5. Penalizações (Máx. 30 pts negativos)',
+    title: '5. Sinais de Alerta (Penalizações)',
     maxPoints: 30,
     isPenalty: true,
     questions: [
       {
         id: 'pen1',
-        text: 'Perguntou apenas o preço e desapareceu?',
+        text: 'Perguntou preço e sumiu (ghosting)?',
         options: STANDARD_YES_NO_OPTIONS(10),
       },
       {
         id: 'pen2',
-        text: 'Disse que está apenas pesquisando?',
+        text: 'Disse que está só pesquisando?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'pen3',
-        text: 'Pediu desconto antes de conhecer o produto?',
+        text: 'Pediu desconto logo de cara?',
         options: STANDARD_YES_NO_OPTIONS(8),
       },
       {
         id: 'pen4',
-        text: 'Não respondeu após duas tentativas?',
+        text: 'Sem resposta após 2 tentativas?',
         options: STANDARD_YES_NO_OPTIONS(10),
       },
       {
         id: 'pen5',
-        text: 'Não possui perfil premium ou o contato é inválido?',
+        text: 'Contato/número inválido?',
         options: STANDARD_YES_NO_OPTIONS(20),
       },
     ],

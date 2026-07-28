@@ -1,16 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { CATEGORIES } from './data/questions';
-import { calculateLeadScore } from './utils/calculator';
+import { calculateLeadScore, generateCopyText } from './utils/calculator';
 import { Header } from './components/Header';
 import { LeadNameInput } from './components/LeadNameInput';
 import { QuestionCategory } from './components/QuestionCategory';
+import { LeadRadarChart } from './components/LeadRadarChart';
 import { ResultSection } from './components/ResultSection';
-import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, BarChart3, Award } from 'lucide-react';
+import {
+  RotateCcw,
+  Copy,
+  Check,
+  Flame,
+  Zap,
+  Snowflake,
+  Clock,
+  Sparkles,
+  UserPlus
+} from 'lucide-react';
 
 export default function App() {
   const [leadName, setLeadName] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [copiedSticky, setCopiedSticky] = useState(false);
+  const [showFullDetails, setShowFullDetails] = useState(false);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers((prev) => ({
@@ -21,206 +33,186 @@ export default function App() {
 
   const handleClear = () => {
     setAnswers({});
-  };
-
-  const handleNewEvaluation = () => {
-    setAnswers({});
     setLeadName('');
-    setCurrentStep(0);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleGoToStep = (stepIndex: number) => {
-    setCurrentStep(stepIndex);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < 5) {
-      setCurrentStep((prev) => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   const scoreResult = useMemo(() => {
     return calculateLeadScore(answers, leadName);
   }, [answers, leadName]);
 
-  const totalSteps = 6; // 5 categories + 1 result step
-  const isResultStep = currentStep === 5;
+  const handleStickyCopy = () => {
+    const text = generateCopyText(scoreResult, leadName);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedSticky(true);
+      setTimeout(() => setCopiedSticky(false), 2500);
+    });
+  };
 
-  const currentCategory = currentStep < 5 ? CATEGORIES[currentStep] : null;
-  const currentCatResult = currentCategory
-    ? scoreResult.categoryResults.find((c) => c.id === currentCategory.id)
-    : null;
+  // Badge helper for floating bar
+  const getBadgeIcon = (classification: string) => {
+    switch (classification) {
+      case 'Lead Quente':
+        return <Flame className="w-4 h-4 text-red-500 fill-red-500 shrink-0" />;
+      case 'Lead Morno':
+        return <Zap className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />;
+      case 'Lead Frio':
+        return <Snowflake className="w-4 h-4 text-sky-500 shrink-0" />;
+      default:
+        return <Clock className="w-4 h-4 text-slate-400 shrink-0" />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans antialiased pb-24">
       <Header />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Step Indicator Tabs */}
-        <div className="bg-white rounded-xl border border-slate-200 p-2 sm:p-3 shadow-xs mb-6">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2 px-1">
-            <span>
-              {isResultStep ? 'Resultado da Avaliação' : `Etapa ${currentStep + 1} de 5: ${currentCategory?.title.split('(')[0]}`}
-            </span>
-            <span className="text-amber-600 font-bold">
-              Score Atual: {scoreResult.totalScore}/100
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
+        {/* SDR Toolbar: Fast Reset for Next Lead */}
+        <div className="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Painel SDR de Qualificação Rápida
             </span>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-100 rounded-full h-2 mb-3 overflow-hidden">
-            <div
-              className="bg-amber-500 h-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-            />
-          </div>
-
-          {/* Step Pills */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-            {CATEGORIES.map((cat, idx) => {
-              const isActive = currentStep === idx;
-              const isCompleted = currentStep > idx;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => handleGoToStep(idx)}
-                  type="button"
-                  className={`py-2 px-1 rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center gap-0.5 border ${
-                    isActive
-                      ? 'bg-amber-500 text-white border-amber-600 font-bold shadow-xs'
-                      : isCompleted
-                      ? 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="truncate max-w-full">{cat.title.split('.')[1]?.split('(')[0]?.trim() || `Etapa ${idx + 1}`}</span>
-                  {isCompleted && <CheckCircle2 className="w-3 h-3 text-amber-600 shrink-0" />}
-                </button>
-              );
-            })}
-
-            {/* Result Tab */}
-            <button
-              onClick={() => handleGoToStep(5)}
-              type="button"
-              className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 border ${
-                isResultStep
-                  ? 'bg-slate-900 text-amber-400 border-slate-900 shadow-xs'
-                  : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
-              }`}
-            >
-              <span className="flex items-center gap-1">
-                <Award className="w-3.5 h-3.5" />
-                <span>Resultado</span>
-              </span>
-            </button>
-          </div>
+          <button
+            onClick={handleClear}
+            type="button"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors active:scale-95"
+            title="Limpar formulário para próximo lead"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-amber-600" />
+            <span>Próximo Lead / Limpar</span>
+          </button>
         </div>
 
-        {/* Lead Name Input (Available on active question steps) */}
-        {!isResultStep && (
-          <LeadNameInput value={leadName} onChange={setLeadName} />
-        )}
+        {/* 2-COLUMN SPLIT LAYOUT (LEFT: Fast Checklist | RIGHT: Radar de Calor) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* LEFT COLUMN: FAST SDR CHECKLIST */}
+          <div className="lg:col-span-7 xl:col-span-7 space-y-3">
+            <LeadNameInput value={leadName} onChange={setLeadName} />
 
-        {/* Active Step Content */}
-        {!isResultStep && currentCategory && (
-          <div>
-            <QuestionCategory
-              category={currentCategory}
-              answers={answers}
-              onAnswerChange={handleAnswerChange}
-              categoryRawPoints={currentCatResult?.rawPoints || 0}
-              categoryCappedPoints={currentCatResult?.cappedPoints || 0}
-            />
+            {CATEGORIES.map((category) => {
+              const catResult = scoreResult.categoryResults.find(
+                (c) => c.id === category.id
+              );
+              return (
+                <QuestionCategory
+                  key={category.id}
+                  category={category}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                  categoryRawPoints={catResult?.rawPoints || 0}
+                  categoryCappedPoints={catResult?.cappedPoints || 0}
+                />
+              );
+            })}
+          </div>
 
-            {/* Step Navigation Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs mt-6">
+          {/* RIGHT COLUMN: RADAR DE CALOR */}
+          <div className="lg:col-span-5 xl:col-span-5 space-y-4">
+            <LeadRadarChart result={scoreResult} />
+
+            {/* Toggle Full Result Breakdown */}
+            <div className="text-center pt-1">
               <button
-                onClick={handlePrevStep}
-                disabled={currentStep === 0}
+                onClick={() => setShowFullDetails(!showFullDetails)}
                 type="button"
-                className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-200/70 hover:bg-slate-200 rounded-lg transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Etapa Anterior</span>
-              </button>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <button
-                  onClick={handleClear}
-                  type="button"
-                  className="px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-medium flex items-center justify-center gap-1 transition-colors"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Limpar</span>
-                </button>
-
-                <button
-                  onClick={() => handleGoToStep(5)}
-                  type="button"
-                  className="px-3 py-2.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <BarChart3 className="w-4 h-4 text-amber-700" />
-                  <span>Ver Resultado ({scoreResult.totalScore} pts)</span>
-                </button>
-              </div>
-
-              <button
-                onClick={handleNextStep}
-                type="button"
-                className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs"
-              >
-                <span>{currentStep === 4 ? 'Calcular e Ver Resultado' : 'Próxima Etapa'}</span>
-                <ChevronRight className="w-4 h-4" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>
+                  {showFullDetails
+                    ? 'Ocultar Relatório Detalhado'
+                    : 'Ver Relatório Completo & Justificativas'}
+                </span>
               </button>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Step 5: Full Result Section */}
-        {isResultStep && (
-          <div className="space-y-4">
+        {/* Full Details Section (Expandable on demand) */}
+        {showFullDetails && (
+          <div className="mt-8 border-t border-slate-200 pt-6">
             <ResultSection
               result={scoreResult}
               leadName={leadName}
               onClear={handleClear}
-              onNewEvaluation={handleNewEvaluation}
-              onCalculateScroll={() => handleGoToStep(5)}
+              onNewEvaluation={handleClear}
+              onCalculateScroll={() => {}}
             />
-
-            <div className="text-center pt-2">
-              <button
-                onClick={() => handleGoToStep(0)}
-                type="button"
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-200/60 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Voltar e revisar perguntas</span>
-              </button>
-            </div>
           </div>
         )}
       </main>
 
-      <footer className="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
-        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Prime Home Decor &copy; {new Date().getFullYear()} — Avaliação Interna de Leads</span>
-          <span className="inline-flex items-center gap-1 text-slate-500">
-            Lead Scoring por Etapas (100% Client-Side)
+      {/* STICKY SDR QUICK ACTION BAR */}
+      <div className="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur-md text-white border-t border-slate-800 p-2.5 z-40 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 px-2 sm:px-4">
+          {/* Live Score Display */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                Score
+              </span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl sm:text-2xl font-black text-amber-400 leading-none">
+                  {scoreResult.totalScore}
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">/100</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold">
+              {getBadgeIcon(scoreResult.classification)}
+              <span>{scoreResult.classification}</span>
+            </div>
+          </div>
+
+          {/* SDR Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClear}
+              type="button"
+              className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1 transition-colors border border-slate-700"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Limpar</span>
+            </button>
+
+            <button
+              onClick={handleStickyCopy}
+              type="button"
+              className={`px-3.5 py-2 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-md active:scale-95 border ${
+                copiedSticky
+                  ? 'bg-emerald-600 text-white border-emerald-500'
+                  : 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400'
+              }`}
+            >
+              {copiedSticky ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>Copiar Resumo WhatsApp</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer className="bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>Prime Home Decor &copy; {new Date().getFullYear()} — SDR Lead Scoring</span>
+          <span className="text-slate-500">
+            100% Client-Side &bull; Radar de Calor Interativo
           </span>
         </div>
       </footer>
     </div>
   );
 }
-
