@@ -1,0 +1,6 @@
+{
+  "name": "Prime Home Decor - Lead Scoring",
+  "description": "Calculadora de lead scoring simples e rápida para a Prime Home Decor",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
